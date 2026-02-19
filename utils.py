@@ -135,4 +135,24 @@ def sample_plot_image(plot_steps = True, device = "cuda" if torch.cuda.is_availa
     if not plot_steps:
         show_tensor_image(img_vis.detach().cpu())
     
-    plt.show()            
+    plt.show()
+
+def prepare_dataset(label_list, download=True, transform=None):
+    '''
+    Downloads and prepares the data
+
+    label_ind - index of the desired label to make the diffusion model on
+    The list is, ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+    '''
+    # Downloading and preparing the CIFAR-10 dataset
+    train_data = torchvision.datasets.CIFAR10('./data', train=True, download=download, transform=transform)
+    test_data = torchvision.datasets.CIFAR10('./data', train=False, download=download, transform=transform)
+
+    train_label_indices = [i for i, label in enumerate(train_data.targets) if label in label_list]
+    test_label_indices = [i for i, label in enumerate(test_data.targets) if label in label_list]
+
+    train = Subset(train_data, train_label_indices)
+    test = Subset(test_data, test_label_indices)
+
+    return torch.utils.data.ConcatDataset([train, test])
+   
